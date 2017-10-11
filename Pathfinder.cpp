@@ -29,23 +29,29 @@ using namespace std;
 	string Pathfinder::toString() const
   {
 		stringstream s;
-		for (int i = 0; i <= 4; i++)
+		for (int k = 0; k <= 4; k++)
 		{
 			for (int j = 0; j <= 4; j++)
 			{
-				for (int k = 0; k <= 4; k++)
+				for (int i = 0; i <= 4; i++)
 				{
-						s << maze[i][j][k] << " ";
+						if (i < 4)
+						{
+							s << maze[i][j][k] << " ";
+						}
+						else
+							s << maze[i][j][k];
+
 				}
 				s << endl;
 			}
-			if (i < 4)
+			if (k < 4)
 			{
 				s << endl;
 			}
 		}
-		maze[0][0][0] << 1;
-		maze[4][4][4] << 1;
+	//	maze[0][0][0] = 1;
+	//	maze[4][4][4] = 1;
 		return s.str();
   }
 
@@ -60,18 +66,18 @@ using namespace std;
 	*/
 	void Pathfinder::createRandomMaze()
 	{
-		for (int i = 0; i <= 4; i++)
+		for (int k = 0; k <= 4; k++)
 		{
 			for (int j = 0; j <= 4; j++)
 			{
-				for (int k = 0; k <= 4; k++)
+				for (int i = 0; i <= 4; i++)
 				{
 					maze[i][j][k] = rand() % 2; //runs 125 times
 				}
 			}
 		}
-		maze[0][0][0] << 1;
-		maze[4][4][4] << 1;
+		maze[0][0][0] = 1;
+		maze[4][4][4] = 1;
 		return;
 	}
 
@@ -99,38 +105,52 @@ using namespace std;
 		ifstream amazing;
 		amazing.open(file_name);
 
-		for (int x = 0; x <= 4; x++)
+		for (int z = 0; z <= 4; z++)
 		{
 			for (int y = 0; y <= 4; y++)
 			{
-				for (int z = 0; z <= 4; z++)
+				for (int x = 0; x <= 4; x++)
 				{
 					string temp1;
 					amazing >> temp1;
 					//cout << temp1 << endl;
-					if (temp1 != "1" && temp1 != "0" && temp1 != " ")
+					if (temp1 != "1" && temp1 != "0")
 					{
 						return false;
 					}
+/*					if (tempMaze[0][0][0] != "1" && tempMaze[4][4][4]!= "1")
+					{
+						return false;
+					}*/
 					tempMaze[x][y][z] = stoi(temp1);
 				}
 			}
 		}
 
+		while (!(amazing.eof()))
+		{
+			string extra;
+			amazing >> extra;
+			if (extra != " " && extra != "\n")
+			{
+				return false;
+			}
+		}
+
 		if (tempMaze[0][0][0] == 1 && tempMaze[4][4][4] == 1)
 		{
-			for (int a = 0; a <= 4; a++)
+			for (int c = 0; c <= 4; c++)
 			{
 				for (int b = 0; b <= 4; b++)
 				{
-					for (int c = 0; c <= 4; c++)
+					for (int a = 0; a <= 4; a++)
 					{
 						maze[a][b][c] = tempMaze[a][b][c];
 					}
 				}
 			}
 		}
-		return maze;
+		return true;
 	}
 
 	//-----------------------------------------------------------------------------------------
@@ -155,6 +175,66 @@ using namespace std;
 	*/
 	vector<string> Pathfinder::solveMaze()
 	{
-		vector<string> dummy;
-		return dummy;
+		P.clear();
+		findPath(0,0,0);
+	//	cout << "OUR MAZE" << endl << toString() << endl << endl;
+		for (int k = 0; k < 5; k++)
+		{
+			for (int j = 0; j < 5; j++)
+			{
+				for (int i = 0; i < 5; i++)
+				{
+					if (maze[i][j][k] == 2)
+					{
+						maze[i][j][k] = 1;
+					}
+				}
+			}
+		}
+//				cout << "OUR MAZE 2" << endl << toString() << endl << endl;
+		return P;
+	}
+
+
+
+
+	bool Pathfinder::findPath(int x, int y, int z)
+	{
+		if (x < 0 || x > 4 || y < 0 || y > 4 || z < 0 || z > 4)
+		{
+	//		P.pop_back();
+			return false;
+		}
+		if (maze[z][y][x]==0 || maze[z][y][x]==2 )
+		{
+	//		P.pop_back();
+			return false;
+		}
+		if (x == 4 && y == 4 && z == 4 )
+		{
+			P.push_back("(4, 4, 4)");
+			return true;
+		}
+		P.push_back("(" + to_string(z) + ", " + to_string(y) + ", " + to_string(x) + ")");
+
+		maze[z][y][x] = 2;
+
+		if (findPath(x - 1, y, z))
+			return true;
+		else if (findPath(x + 1, y, z))
+			return true;
+		else if (findPath(x, y - 1, z))
+			return true;
+		else if (findPath(x, y + 1, z))
+			return true;
+		else if (findPath(x, y, z - 1))
+			return true;
+		else if (findPath(x, y, z + 1))
+			return true;
+		else
+		{
+			P.pop_back();
+			return false;
+		}
+		return false;
 	}
